@@ -213,6 +213,38 @@ export default {
       await shot(`81-fall-${i}`);
     }
   },
+  async audio({ page }) {
+    const r = await page.evaluate(async () => {
+      const Engine = window.__rafting.audio.constructor;
+      const results = {};
+      const render = async (name, fn, secs = 3) => {
+        const sr = 22050;
+        const Off = window.OfflineAudioContext;
+        window.AudioContext = function () { return new Off(2, sr * secs, sr); };
+        const e = new Engine();
+        e.init();
+        fn(e);
+        const buf = await e.ctx.startRendering();
+        let peak = 0;
+        let sum = 0;
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i]); if (v > peak) peak = v; sum += v * v; }
+        results[name] = { peak: +peak.toFixed(3), rms: +Math.sqrt(sum / d.length).toFixed(3) };
+      };
+      const amb = (e, roar) => e.update(0.016, { active: true, speedK: 0.6, roar, rough: 0.5, whirl: 0, canyon: 0, scrape: 0, damage: 0, sway: 0, sawing: 0 });
+      await render('ambience-calm', (e) => amb(e, 0));
+      await render('ambience-near-rock', (e) => amb(e, 1));
+      await render('crash', (e) => { amb(e, 0.5); e.crash(1); });
+      await render('voice', (e) => e.voice('L', '왼쪽이라니까!', 'angry'));
+      await render('voice+amb', (e) => { amb(e, 0.5); e.voice('R', '오른쪽이 정답!', 'happy'); });
+      await render('drop', (e) => e.drop());
+      await render('creak', (e) => e.creak(1));
+      await render('fanfare', (e) => e.fanfare());
+      await render('splash', (e) => e.splash(1));
+      return results;
+    });
+    console.log(JSON.stringify(r, null, 1));
+  },
   async auto({ page, shot, wait }) {
     await start(page, wait);
     await ev(page, () => { const a = window.__rafting; a.auto = { fair: true }; a.fast = 4; });

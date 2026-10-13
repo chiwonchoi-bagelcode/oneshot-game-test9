@@ -20,7 +20,7 @@ export class AudioEngine {
     this.sawT = 0;
     this.sawUp = false;
     this.music = null;
-    this.lastVoice = { L: 0, C: 0, R: 0 };
+    this.lastVoice = { L: -1, C: -1, R: -1 };
   }
 
   init() {
@@ -45,7 +45,7 @@ export class AudioEngine {
     this.amb.gain.value = 0.8;
     this.amb.connect(this.master);
     this.voiceBus = ctx.createGain();
-    this.voiceBus.gain.value = 0.5;
+    this.voiceBus.gain.value = 1.3;
     this.voiceBus.connect(this.master);
     this.musicBus = ctx.createGain();
     this.musicBus.gain.value = 0.16;
@@ -180,15 +180,15 @@ export class AudioEngine {
     if (!this.ready) return;
     const t = this.ctx.currentTime;
     const on = s.active ? 1 : 0.35;
-    this.rushG.gain.setTargetAtTime((0.16 + 0.12 * s.speedK) * on, t, 0.3);
+    this.rushG.gain.setTargetAtTime((0.14 + 0.1 * s.speedK) * on, t, 0.3);
     this.rushF.frequency.setTargetAtTime(500 + 900 * s.speedK + 600 * s.roar, t, 0.3);
-    this.roarG.gain.setTargetAtTime((0.04 + 0.55 * s.roar * s.roar + 0.12 * s.rough) * on, t, 0.12);
+    this.roarG.gain.setTargetAtTime((0.03 + 0.36 * s.roar * s.roar + 0.08 * s.rough) * on, t, 0.12);
     this.roarF.frequency.setTargetAtTime(1000 + 1400 * s.roar, t, 0.2);
     this.roarPan.pan.setTargetAtTime(Math.max(-0.8, Math.min(0.8, s.roarPan || 0)), t, 0.2);
     this.gurG.gain.setTargetAtTime((0.1 + 0.25 * s.rough) * on, t, 0.4);
     this.gurF.frequency.setTargetAtTime(250 + Math.random() * 250, t, 0.1);
     this.whirlG.gain.setTargetAtTime(0.5 * s.whirl, t, 0.25);
-    this.scrG.gain.setTargetAtTime(0.25 * s.scrape, t, 0.05);
+    this.scrG.gain.setTargetAtTime(0.16 * s.scrape, t, 0.05);
     this.scrF.frequency.setTargetAtTime(1800 + Math.random() * 1200, t, 0.03);
     this.revWet.gain.setTargetAtTime(0.05 + 0.5 * s.canyon, t, 0.5);
     this.musicBus.gain.setTargetAtTime(this.musicOn ? 0.15 * (1 - 0.45 * s.roar) : 0, t, 0.4);
@@ -258,8 +258,8 @@ export class AudioEngine {
 
   // ---------- one-shots ----------
   splash(k = 0.6, pan = 0) {
-    this.noiseShot({ type: 'lowpass', f0: 3500, f1: 400, q: 0.7, a: 0.01, d: 0.25 + 0.25 * k, peak: 0.25 + 0.35 * k, pan: pan * 0.6 });
-    this.tone({ f0: 260, f1: 70, d: 0.12, peak: 0.12 * k, pan: pan * 0.6 });
+    this.noiseShot({ type: 'lowpass', f0: 3500, f1: 400, q: 0.7, a: 0.01, d: 0.25 + 0.25 * k, peak: 0.35 + 0.55 * k, pan: pan * 0.6 });
+    this.tone({ f0: 260, f1: 70, d: 0.12, peak: 0.22 * k, pan: pan * 0.6 });
   }
   plop(k = 0.5) {
     this.tone({ f0: 700, f1: 160, d: 0.1, peak: 0.18 * k });
@@ -289,20 +289,20 @@ export class AudioEngine {
     bp.Q.value = 14;
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.5 * k, t + 0.06);
-    g.gain.setValueAtTime(0.5 * k, t + dur * 0.7);
+    g.gain.exponentialRampToValueAtTime(1.1 * k, t + 0.06);
+    g.gain.setValueAtTime(1.1 * k, t + dur * 0.7);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(bp).connect(g).connect(this.sfx);
     o.start(t);
     o.stop(t + dur + 0.05);
   }
   crack(k = 0.6) {
-    for (let i = 0; i < 3; i++) this.noiseShot({ type: 'highpass', f0: 1800 + Math.random() * 1500, d: 0.03 + Math.random() * 0.04, peak: 0.3 * k, delay: i * (0.02 + Math.random() * 0.05) });
+    for (let i = 0; i < 3; i++) this.noiseShot({ type: 'highpass', f0: 1800 + Math.random() * 1500, d: 0.03 + Math.random() * 0.04, peak: 0.55 * k, delay: i * (0.02 + Math.random() * 0.05) });
     this.tone({ type: 'square', f0: 180, f1: 90, d: 0.06, peak: 0.08 * k });
   }
   thud(k = 0.7) {
-    this.tone({ f0: 110, f1: 38, d: 0.3, peak: 0.55 * k });
-    this.noiseShot({ type: 'lowpass', f0: 600, f1: 120, d: 0.25, peak: 0.25 * k });
+    this.tone({ f0: 110, f1: 38, d: 0.3, peak: 1.0 * k });
+    this.noiseShot({ type: 'lowpass', f0: 600, f1: 120, d: 0.25, peak: 0.5 * k });
   }
   crash(k = 0.8) {
     this.thud(k);
