@@ -32,7 +32,8 @@ export class PaddleView {
   onThrow(e) {
     const tilt = this.house.tilt;
     tilt.attach(this.obj);
-    this.flight = { from: e.from, to: e.to, start: this.obj.position.clone(), startQ: this.obj.quaternion.clone(), dur: e.dur };
+    const center = this.obj.position.clone().add(_a.set(0, LEN / 2, 0).applyQuaternion(this.obj.quaternion));
+    this.flight = { from: e.from, to: e.to, start: center, dur: e.dur };
     this.audio?.whoosh();
   }
 

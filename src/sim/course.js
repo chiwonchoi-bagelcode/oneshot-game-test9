@@ -116,37 +116,37 @@ export function beachLine(u) {
 // Rows of rocks: either explicit rocks [u, r] or a single navigable gap [center, width].
 const ROWS = [
   { d: 104, rocks: [[0.4, 2.7]] },
-  { d: 142, gap: [5, 13.1] },
-  { d: 174, gap: [-4.5, 12.9] },
+  { d: 142, gap: [4.5, 13.1] },
+  { d: 174, gap: [-3.5, 12.9] },
   { d: 207, rocks: [[0.6, 2.3], [-13.4, 1.5], [13.6, 1.5]] },
-  { d: 240, gap: [6, 12.5] },
-  { d: 272, gap: [-5.5, 12.5] },
-  { d: 302, gap: [0.5, 12.1] },
-  { d: 332, gap: [6.5, 12.1] },
-  { d: 358, gap: [-2.5, 11.9] },
-  { d: 382, gap: [4.5, 11.7] },
-  { d: 406, gap: [-4.5, 11.7] },
-  { d: 430, gap: [1.5, 12.1] },
+  { d: 240, gap: [5, 12.5] },
+  { d: 272, gap: [-4, 12.5] },
+  { d: 302, gap: [1, 12.1] },
+  { d: 332, gap: [5.5, 12.1] },
+  { d: 358, gap: [-1.5, 11.9] },
+  { d: 382, gap: [4, 11.7] },
+  { d: 406, gap: [-3, 11.7] },
+  { d: 430, gap: [2, 12.1] },
   { d: 459, rocks: [[-14.6, 1.7], [12.9, 2.1]] },
-  { d: 507, gap: [-9.8, 11.8] },
+  { d: 507, gap: [-8.8, 11.8] },
   { d: 538, gap: [-2.5, 12.1] },
   { d: 592, rocks: [[-4.6, 1.5]] },
   { d: 619, rocks: [[4.1, 1.45]] },
   { d: 708, rocks: [[0.4, 2.0]] },
-  { d: 742, gap: [6, 12.2] },
-  { d: 772, gap: [-3, 11.8] },
-  { d: 801, gap: [5, 11.8] },
-  { d: 830, gap: [-4, 11.8] },
+  { d: 742, gap: [5, 12.6] },
+  { d: 772, gap: [-2, 12.2] },
+  { d: 801, gap: [4, 12.2] },
+  { d: 830, gap: [-3, 12.2] },
   { d: 862, rocks: [[-12.8, 2.0], [13.6, 1.4]] },
-  { d: 911, gap: [8.6, 11.8] },
+  { d: 911, gap: [7.8, 11.8] },
   { d: 941, gap: [1.5, 11.8] },
-  { d: 968, gap: [-4.5, 11.4] },
+  { d: 968, gap: [-4, 11.4] },
   { d: 994, gap: [1, 11.4] },
-  { d: 1020, gap: [6, 11.4] },
+  { d: 1020, gap: [5.5, 11.4] },
   { d: 1046, gap: [0.5, 11.4] },
-  { d: 1072, gap: [-5.5, 11.4] },
+  { d: 1072, gap: [-5, 11.4] },
   { d: 1098, gap: [-0.5, 11.4] },
-  { d: 1124, gap: [5, 11.4] },
+  { d: 1124, gap: [4.5, 11.4] },
   { d: 1150, gap: [-0.5, 11.2] },
   { d: 1176, rocks: [[-8.8, 2.7], [8.8, 2.7]] },
 ];
@@ -225,7 +225,7 @@ export function rocksInRange(d0, d1, out) {
 
 // ---------- flow field ----------
 const _near = [];
-export function flowAt(u, d, out = { u: 0, d: 0 }) {
+export function flowAt(u, d, out = { u: 0, d: 0 }, noPools = false) {
   const hw = halfWidth(d);
   const s = flowSpeed(d);
   const x = clamp(u / hw, -1.3, 1.3);
@@ -251,7 +251,7 @@ export function flowAt(u, d, out = { u: 0, d: 0 }) {
     fu += k2 * (-2 * R2 * ds * dt / r4);
   }
   // whirlpools
-  for (const p of POOLS) {
+  if (!noPools) for (const p of POOLS) {
     const du = u - p.u;
     const dd = d - p.d;
     const r = Math.hypot(du, dd);

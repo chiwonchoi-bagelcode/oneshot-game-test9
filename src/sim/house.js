@@ -59,6 +59,9 @@ export function createHouse() {
     moored: true,
     pin: 0,
     pinSide: 0,
+    stall: 0,
+    ghost: 0,
+    aligned: false,
   };
 }
 
@@ -143,7 +146,7 @@ export function stepHouse(h, dt, time, contacts) {
       const ad = -sPsi * c.x + cPsi * -c.z; // arm (d)
       const pu = h.u + ax;
       const pd = h.d + ad;
-      flowAt(pu, pd, _f);
+      flowAt(pu, pd, _f, h.whirlCooldown > 0);
       // velocity of point: v + omega x arm  (omega clockwise-positive)
       const vpu = h.vu + h.omega * ad;
       const vpd = h.vd - h.omega * ax;
@@ -193,7 +196,7 @@ function unpin(h, dt, contacts, from) {
     h.pinCheck = (h.pinCheck || 0) - dt;
     if ((!h.pinSide && h.pin > 0.08) || (h.pinSide && h.pinCheck <= 0)) {
       h.pinSide = openSide(h);
-      h.pinCheck = 0.5;
+      h.pinCheck = 0.25;
     }
   } else {
     h.pin = Math.max(0, h.pin - dt * 0.6);
@@ -203,26 +206,52 @@ function unpin(h, dt, contacts, from) {
   if (h.vd < 1.5 && !h.whirl && h.pinSide) h.stall = (h.stall || 0) + dt;
   else h.stall = Math.max(0, (h.stall || 0) - dt * 2);
   if (h.pin > 0.08 && h.pinSide) {
-    const k = Math.min(1, (h.pin - 0.08) * 4) + Math.min(1.5, h.stall * 0.6);
-    h.vu += h.pinSide * 11 * k * dt;
-    h.omega += h.pinSide * 1.2 * Math.min(1, k) * dt;
+    if (h.aligned) {
+      // lined up with a gap: the current drops the house straight through it
+      h.vu *= Math.exp(-dt * 7);
+      h.vd += 5 * dt;
+      h.omega *= Math.exp(-dt * 3);
+    } else {
+      const k = Math.min(1, (h.pin - 0.08) * 4) + Math.min(1.5, h.stall * 0.6);
+      h.vu += h.pinSide * 11 * k * dt;
+      h.omega += h.pinSide * 1.2 * Math.min(1, k) * dt;
+      // wedged in a pocket between rocks: back out against the current first
+      if (h.stall > 0.8) h.vd -= 13 * Math.min(1, h.stall - 0.8) * dt;
+    }
+  }
+  // last resort so the raft can never be stuck for good: let it squeeze past the rocks
+  if (h.stall > 2.6) {
+    h.ghost = 1.1;
+    h.stall = 0;
+  }
+  if (h.ghost > 0) {
+    h.ghost -= dt;
+    h.vu += (h.pinSide || 1) * 6 * dt;
+    h.vd += 3 * dt;
   }
 }
 
 const _rowNear = [];
+const _blocked = [];
 function openSide(h) {
-  const halfL = h.u - h.minU + 0.4;
-  const halfR = h.maxU - h.u + 0.4;
+  const halfL = h.u - h.minU + 0.3;
+  const halfR = h.maxU - h.u + 0.3;
   rocksInRange(h.d - 3, h.d + 7, _rowNear);
-  const blocked = [];
+  _blocked.length = 0;
   for (const i of _rowNear) {
     const rk = ROCKS[i];
-    blocked.push([rk.u - rk.r - halfR, rk.u + rk.r + halfL]);
+    _blocked.push(rk.u - rk.r - halfR, rk.u + rk.r + halfL);
   }
   const hw = halfWidth(h.d + 3);
   const lo = -hw + halfL;
   const hi = hw - halfR;
-  const free = (u) => u >= lo && u <= hi && !blocked.some(([a, b]) => u > a && u < b);
+  const free = (u) => {
+    if (u < lo || u > hi) return false;
+    for (let k = 0; k < _blocked.length; k += 2) if (u > _blocked[k] && u < _blocked[k + 1]) return false;
+    return true;
+  };
+  h.aligned = free(h.u);
+  if (h.aligned) return h.pinSide || (h.u > 0 ? -1 : 1);
   for (let s = 0.25; s < 30; s += 0.25) {
     const l = free(h.u - s);
     const r = free(h.u + s);
@@ -296,8 +325,9 @@ function releaseTravel(a, dir) {
 }
 
 function angleToRelease(a, dir) {
-  // desired release angle: -45° for CCW (fling right), -135° for CW (fling left)
-  const rel = dir > 0 ? -Math.PI / 4 : (-3 * Math.PI) / 4;
+  // release low on the downstream-facing side so the fling is mostly sideways:
+  // -65° for CCW (fling right), -115° for CW (fling left)
+  const rel = dir > 0 ? (-65 * Math.PI) / 180 : (-115 * Math.PI) / 180;
   let diff = (rel - a) * dir; // positive travel along spin direction
   diff = ((diff % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
   return diff;
@@ -328,12 +358,12 @@ export function releaseWhirl(h, kickU, kickD) {
   const p = w.pool;
   const tu = -Math.sin(w.angle) * p.dir;
   const td = Math.cos(w.angle) * p.dir;
-  const sp = 8.6;
+  const sp = 10.5;
   h.vu = tu * sp + kickU;
-  h.vd = Math.max(1.5, td * sp) + kickD;
+  h.vd = Math.max(2.5, td * sp) + kickD;
   h.omega *= 0.45;
   h.whirl = null;
-  h.whirlCooldown = 2.6;
+  h.whirlCooldown = 3.2;
   h.released = { t: 0, early: w.travelled < w.target - 0.05 };
 }
 
@@ -350,6 +380,7 @@ function collide(h, dt, contacts) {
     let pu = h.u + ax;
     let pd = h.d + ad;
     for (let k = 0; k < _near.length; k++) {
+      if (h.ghost > 0) break;
       const rk = ROCKS[_near[k]];
       const du = pu - rk.u;
       const dd = pd - rk.d;

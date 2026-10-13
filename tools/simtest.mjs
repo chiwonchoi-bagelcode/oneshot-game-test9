@@ -41,8 +41,17 @@ export function run(opts = {}) {
   let lastDecision = -1;
   const log = [];
   while (g.state === 'running' && t < 400) {
-    if (t - lastDecision >= (opts.reaction ?? 0.3) && !g.paddle.flight) {
+    const reaction = opts.jitter ? (opts.reaction ?? 0.3) * (0.6 + Math.random() * 0.8) : (opts.reaction ?? 0.3);
+    if (t - lastDecision >= reaction && !g.paddle.flight) {
       lastDecision = t;
+      if (opts.sloppy && Math.random() < opts.sloppy) {
+        const a = g.aboard();
+        if (Math.random() < 0.5) g.tap(a[Math.floor(Math.random() * a.length)]);
+        g.update(dt);
+        g.events.length = 0;
+        t += dt;
+        continue;
+      }
       const options = [null, ...g.aboard().filter((id) => id !== g.paddle.holder)];
       let best = null;
       let bestCost = 1e9;
@@ -81,6 +90,20 @@ export const CASES = [
   ['ditch L', { fair: true, sacrifice: 'L' }],
 ];
 const only = process.argv.find((a) => a.startsWith('--case='));
+if (process.argv.includes('--human')) {
+  const res = { arrived: 0, failed: 0, endings: {}, d: [] };
+  const N = Number(process.argv.find((a) => a.startsWith('--n='))?.slice(4) || 10);
+  for (let i = 0; i < N; i++) {
+    const { g } = run({ fair: Math.random() < 0.6, reaction: 0.5, jitter: true, sloppy: 0.12, horizon: 2.0 });
+    if (g.state === 'arrived') {
+      res.arrived++;
+      res.endings[g.endingId] = (res.endings[g.endingId] || 0) + 1;
+    } else res.failed++;
+    res.d.push(Math.round(g.house.d));
+  }
+  console.log(JSON.stringify(res));
+  process.exit(0);
+}
 if (process.argv[1].endsWith("simtest.mjs")) for (const [name, opts] of CASES) {
   if (only && !name.includes(only.slice(7))) continue;
   const { g, log } = run(opts);

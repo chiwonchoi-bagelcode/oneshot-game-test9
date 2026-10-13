@@ -417,18 +417,19 @@ export class Game {
         if (worst.type !== 'rock') return;
         h.invuln = 1.2;
         this.stats.hits++;
-        this.hp -= 0.5;
+        this.hp -= 0.34;
         this.emit('hit', { strength: 0.8, part: 'door', lx: 0, lz: 0, kind: 'rock', hp: this.hp, door: true });
         if (this.hp <= 0.01) this.fail('door');
         return;
       }
-      const mult = Math.pow(h.mass, -0.85);
-      const base = worst.type === 'rock' ? clamp((worst.speed - 0.4) * 3.6, 5, 17) : clamp((worst.speed - 1.0) * 3, 3, 10);
+      // already wedged against the rocks: grinding along them hurts far less than a fresh crash
+      const mult = Math.pow(h.mass, -0.85) * (h.pin > 0.3 ? 0.35 : 1);
+      const base = worst.type === 'rock' ? clamp((worst.speed - 0.4) * 3.2, 5, 15) : clamp((worst.speed - 1.0) * 3, 3, 10);
       const dmg = base * mult / 100;
       this.hp -= dmg;
       h.invuln = 0.65;
       this.stats.hits++;
-      const s = clamp(base / 17, 0.25, 1);
+      const s = clamp(base / 15, 0.25, 1);
       leanKick(h, worst.nu * 1.1 * s * Math.cos(h.psi), -0.9 * s);
       for (const id of this.aboard()) this.owners[id].flinch = 0.6;
       this.emit('hit', { strength: s, part: worst.part, lx: worst.lx, lz: worst.lz, kind: worst.type, hp: this.hp });
