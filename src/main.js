@@ -328,6 +328,7 @@ class App {
         }
         case 'stroke': {
           v.onStroke(e, game);
+          if (e.big) this.showPushArrow(e.id, e.dir);
           if (e.big) {
             this.rig.punch(0.6);
             this.rig.shake(0.12);
@@ -446,6 +447,14 @@ class App {
       }
     }
     game.events.length = 0;
+  }
+
+  // a chevron beside the house showing which way the new paddler is hauling it
+  showPushArrow(id, dir) {
+    const p = this.ui.project(this.house.root.position);
+    const glyph = dir < 0 ? '◀◀' : dir > 0 ? '▶▶' : '▶◀';
+    const x = p.x + dir * this.w * 0.36;
+    this.ui.popup(glyph, null, `arrow ${id}`, { x, y: p.y - this.h * 0.04 });
   }
 
   panOf(id) {

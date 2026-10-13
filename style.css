@@ -158,6 +158,8 @@ html, body {
 .pop.saw { color: #ffd27a; font-size: clamp(18px, 6cqw, 28px); animation-duration: 0.7s; }
 .pop.drop { color: #fff; font-size: clamp(40px, 14cqw, 70px); animation-duration: 1.1s; }
 .pop.good { color: #8ff07a; }
+.pop.arrow { font-size: clamp(26px, 9cqw, 40px); letter-spacing: -6px; animation-duration: 0.75s; }
+.pop.arrow.L { color: #ff7a6a; } .pop.arrow.R { color: #7ab2ff; } .pop.arrow.C { color: #ffd04a; }
 @keyframes pop {
   0% { transform: translate(var(--x), var(--y)) translate(-50%, -50%) scale(0.2) rotate(var(--r)); opacity: 0; }
   18% { transform: translate(var(--x), var(--y)) translate(-50%, -50%) scale(1.15) rotate(var(--r)); opacity: 1; }
