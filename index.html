@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#2f7fd8" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="description" content="세 집주인, 노는 하나. 부서지고 잘려 나가는 공동명의 집을 끝까지 기슭에 대는 세로 화면 급류 액션 게임." />
+  <title>공동명의 급류타기</title>
+  <link rel="stylesheet" href="assets/fonts/jua.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="backdrop" aria-hidden="true"></div>
+  <div id="frame">
+    <canvas id="game"></canvas>
+    <div id="vignette"></div>
+    <div id="flash"></div>
+    <div id="drops"></div>
+
+    <div id="hud" class="hidden">
+      <div class="hud-row">
+        <div id="hp" title="집 상태"><div class="hp-icon"></div><div class="hp-bar"><i></i></div></div>
+        <div id="progress">
+          <div class="track"><div class="fill"></div><div class="marks"></div><div class="boat"></div></div>
+          <div class="section-name"></div>
+        </div>
+        <button id="btn-pause" class="icon-btn" aria-label="일시정지">II</button>
+      </div>
+    </div>
+
+    <div id="bubbles"></div>
+    <div id="popups"></div>
+    <div id="banner"></div>
+    <div id="hint" class="hidden"></div>
+
+    <div id="screen-title" class="screen">
+      <div class="title-card">
+        <div class="logo">
+          <span class="logo-sub">세 집주인 · 노는 하나</span>
+          <h1>공동명의<br /><em>급류타기</em></h1>
+        </div>
+        <div class="owners">
+          <div class="owner-chip L"><b>좌봉식</b><span>← 왼쪽 기슭만</span></div>
+          <div class="owner-chip C"><b>한가운</b><span>→ 가운데만 ←</span></div>
+          <div class="owner-chip R"><b>우말순</b><span>오른쪽 기슭만 →</span></div>
+        </div>
+        <ul class="howto">
+          <li><b>집주인을 탭</b>하면 노가 휙 날아가요. 받은 사람은 <b>자기 쪽으로만</b> 저어요.</li>
+          <li>바위 바로 앞에서 던지면 <b>크게 퍼 저어</b> 휘청! 아슬아슬하게 비껴가요.</li>
+          <li>노를 오래 못 받으면 삐치다가… <b>톱</b>을 꺼냅니다.</li>
+        </ul>
+        <button id="btn-start" class="big-btn">출발!</button>
+        <div id="endings-found"></div>
+        <div class="title-foot">마우스 클릭으로도 플레이할 수 있어요 · 소리를 켜 주세요</div>
+      </div>
+    </div>
+
+    <div id="screen-pause" class="screen hidden">
+      <div class="panel">
+        <h2>잠깐 정박 중</h2>
+        <button id="btn-resume" class="big-btn">계속 타기</button>
+        <button id="btn-restart" class="mid-btn">처음부터 다시</button>
+        <button id="btn-sound" class="mid-btn">소리: 켜짐</button>
+        <button id="btn-music" class="mid-btn">음악: 켜짐</button>
+      </div>
+    </div>
+
+    <div id="screen-end" class="screen hidden">
+      <div class="end-panel">
+        <div class="end-kicker"></div>
+        <h2 class="end-title"></h2>
+        <div class="end-sub"></div>
+        <p class="end-desc"></p>
+        <div class="end-captain"></div>
+        <div class="end-photos"></div>
+        <div class="end-stats"></div>
+        <div class="end-buttons">
+          <button id="btn-again" class="big-btn">다시 타기</button>
+          <button id="btn-home" class="mid-btn">처음 화면</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loading">강물 채우는 중…</div>
+  </div>
+  <script src="dist/game.js"></script>
+</body>
+</html>

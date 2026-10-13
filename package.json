@@ -1,0 +1,24 @@
+{
+  "name": "gongdong-rafting",
+  "version": "1.0.0",
+  "private": true,
+  "description": "공동명의 급류타기 — 세 집주인과 함께 급류를 내려가는 세로 화면 3D 웹 게임",
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "dev": "node tools/build.mjs --serve",
+    "fonts": "python3 tools/fonts.py",
+    "simtest": "node tools/simtest.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chiwonchoi-bagelcode/oneshot-game-test9.git"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
+  }
+}
