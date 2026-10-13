@@ -213,6 +213,24 @@ export default {
       await shot(`81-fall-${i}`);
     }
   },
+  async desktop({ page, shot, wait }) {
+    await wait(1500);
+    await shot('90-desktop-title');
+    await page.click('#btn-start');
+    await wait(2500);
+    // click on the left owner with the mouse
+    const p = await ev(page, () => {
+      const a = window.__rafting;
+      const r = a.canvas.getBoundingClientRect();
+      const s = a.ui.project(a.house.views.L.chestWorld(new a.camera.position.constructor()));
+      return { x: r.left + s.x, y: r.top + s.y };
+    });
+    await page.mouse.click(p.x, p.y);
+    await wait(600);
+    await shot('91-desktop-click');
+    const holder = await ev(page, () => window.__rafting.game.paddle.holder);
+    console.log('holder after click:', holder);
+  },
   async audio({ page }) {
     const r = await page.evaluate(async () => {
       const Engine = window.__rafting.audio.constructor;
