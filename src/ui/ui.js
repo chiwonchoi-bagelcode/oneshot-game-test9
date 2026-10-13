@@ -40,7 +40,7 @@ export class UI {
 
   buildTrackMarks() {
     const marks = $('#progress .marks');
-    const icons = { whirl: '🌀', canyon: '⛰️', beach: '🏁', rocks: '🪨' };
+    const icons = { whirl: '🌀', canyon: '⛰', beach: '🏁' };
     for (const s of SECTIONS) {
       if (!icons[s.icon]) continue;
       const span = document.createElement('span');
@@ -109,6 +109,37 @@ export class UI {
   clearBubbles() {
     for (const id in this.bubbles) this.bubbles[id].el.remove();
     this.bubbles = {};
+  }
+
+  // ---------- name tags under the owners (first seconds of a run) ----------
+  showTags(on) {
+    if (!this.tags) {
+      this.tags = {};
+      const txt = { L: '← 좌봉식', C: '한가운 (가운데)', R: '우말순 →' };
+      for (const id of ['L', 'C', 'R']) {
+        const el = document.createElement('div');
+        el.className = `name-tag ${id}`;
+        el.textContent = txt[id];
+        this.bubbleLayer.appendChild(el);
+        this.tags[id] = el;
+      }
+    }
+    this.tagsOn = on;
+    for (const id in this.tags) this.tags[id].classList.toggle('on', on);
+  }
+
+  updateTags(getFeet) {
+    if (!this.tags || !this.tagsOn) return;
+    for (const id in this.tags) {
+      const el = this.tags[id];
+      const w = getFeet(id);
+      if (!w) {
+        el.classList.remove('on');
+        continue;
+      }
+      const p = this.project(w);
+      el.style.transform = `translate(${p.x - el.offsetWidth / 2}px, ${p.y + 6}px)`;
+    }
   }
 
   // ---------- pop text ----------

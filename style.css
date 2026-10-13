@@ -136,6 +136,14 @@ html, body {
 @keyframes bub-in { from { transform: translate(var(--x), var(--y)) scale(0.3); } to { transform: translate(var(--x), var(--y)) scale(1); } }
 @keyframes bub-out { to { transform: translate(var(--x), var(--y)) scale(0.2); opacity: 0; } }
 
+.name-tag {
+  position: absolute; left: 0; top: 0; padding: 2px 8px 3px; border-radius: 10px; white-space: nowrap;
+  font-size: clamp(12px, 3.6cqw, 16px); color: #fff; border: 2.5px solid var(--ink); opacity: 0; transition: opacity 0.6s;
+  box-shadow: 0 2px 0 var(--ink);
+}
+.name-tag.on { opacity: 1; }
+.name-tag.L { background: var(--L); } .name-tag.R { background: var(--R); } .name-tag.C { background: #d99a12; }
+
 /* ---------- onomatopoeia ---------- */
 .pop {
   position: absolute; left: 0; top: 0; white-space: nowrap; font-size: clamp(26px, 9cqw, 44px); color: #fff;

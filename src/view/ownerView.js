@@ -105,6 +105,10 @@ export class OwnerView {
     this.shock = 1.6;
     this.shockAt = targetPos;
   }
+  onBlame(at) {
+    this.blame = 1.5;
+    this.shockAt = at;
+  }
   onCheer(t = 1.2) {
     this.cheer = t;
   }
@@ -130,6 +134,7 @@ export class OwnerView {
     this.catchAnim = Math.max(0, this.catchAnim - dt);
     this.appeaseAnim = Math.max(0, this.appeaseAnim - dt);
     this.shock = Math.max(0, this.shock - dt);
+    this.blame = Math.max(0, (this.blame || 0) - dt);
     this.cheer = Math.max(0, this.cheer - dt);
     this.bonk = Math.max(0, this.bonk - dt);
     this.keatonT = Math.max(0, this.keatonT - dt);
@@ -139,6 +144,7 @@ export class OwnerView {
     if (this.forced) pose = this.forced;
     else if (o.state === 'gone') pose = 'farewell';
     else if (o.state === 'overboard') pose = 'swim';
+    else if (o.leaving > 0) pose = 'beat';
     else if (o.sawing) pose = 'sawing';
     else if (o.dizzy > 0.4) pose = 'dizzy';
     else if (this.bonk > 0) pose = 'bonk';
@@ -147,6 +153,7 @@ export class OwnerView {
     else if (incoming) pose = 'catchReady';
     else if (this.throwAnim > 0) pose = 'throw';
     else if (this.shock > 0) pose = 'shock';
+    else if (this.blame > 0) pose = 'point';
     else if (this.cheer > 0) pose = 'cheer';
     else if (o.stage >= STAGE.SAW) pose = 'saw';
     else if (o.stage === STAGE.STEAMING) pose = 'steam';
@@ -176,7 +183,7 @@ export class OwnerView {
         tx = this.def.x + Math.sign(this.def.x) * 0.25;
       }
       face = Math.atan2(this.strokeSide.x, this.strokeSide.y);
-    } else if (pose === 'sawing') {
+    } else if (pose === 'sawing' || pose === 'beat') {
       const c = clamp(o.cut, 0, 1);
       if (this.id === 'C') {
         tx = lerp(-1.55, 1.55, c);
@@ -188,6 +195,7 @@ export class OwnerView {
         tz = lerp(-1.95, 1.0, c);
         face = -sx * Math.PI / 2;
       }
+      if (pose === 'beat') face = 0;
     } else if (pose === 'annoyed' || pose === 'steam' || pose === 'catchReady') {
       glareAt(pose === 'catchReady' ? ctx.views[flight.from] : holderView);
       if (pose === 'annoyed' && Math.sin(t * 0.7 + this.def.x) > 0.75) face += 1.4 * Math.sign(this.def.x || 1); // "흥!" turn away
@@ -195,7 +203,7 @@ export class OwnerView {
       // eyeing the cut line
       if (this.id === 'C') face = Math.PI * 0.9;
       else face = -Math.sign(this.def.x) * Math.PI * 0.4;
-    } else if (pose === 'shock' && this.shockAt) {
+    } else if ((pose === 'shock' || (pose === 'point' && !this.forced)) && this.shockAt) {
       const p = this.house.toPartLocal(this.def.room, this.shockAt, _w);
       face = Math.atan2(p.x - this.pos.x, p.z - this.pos.y);
     } else if (pose === 'throw' && flight) {
@@ -277,7 +285,7 @@ export class OwnerView {
     tgtR.set(0.34, 0.42, 0.06);
     tgtL.y += Math.sin(t * 2.2) * 0.02;
     tgtR.y += Math.sin(t * 2.2 + 1) * 0.02;
-    ch.saw.visible = pose === 'saw' || pose === 'sawing' || (this.appeaseAnim > 0.6);
+    ch.saw.visible = pose === 'saw' || pose === 'sawing' || pose === 'beat' || (this.appeaseAnim > 0.6);
     ch.hanky.visible = pose === 'farewell';
     let headYaw = 0;
     let headPitch = 0;
@@ -351,6 +359,13 @@ export class OwnerView {
         }
         break;
       }
+      case 'beat':
+        // a little wave to the audience before the floor goes
+        tgtR.set(0.32, 1.25 + Math.sin(t * 14) * 0.06, 0.25);
+        tgtL.set(-0.3, 0.45, 0.15);
+        headPitch = -0.15;
+        headYaw = 0.15;
+        break;
       case 'dizzy':
         tgtL.set(-0.6, 0.65 + Math.sin(t * 6) * 0.2, 0.1);
         tgtR.set(0.6, 0.65 - Math.sin(t * 6) * 0.2, 0.1);
@@ -478,6 +493,9 @@ export class OwnerView {
         break;
       case 'sawing':
         f = { brow: -0.6, mouth: Math.sin(t * 4) > 0 ? 'grit' : 'smirk', eyes: 'narrow', anger: 0.4 };
+        break;
+      case 'beat':
+        f = { brow: 0.45, browTilt: 0.4, mouth: 'smirk', eyes: 'open', anger: 0, blush: 0.6 };
         break;
       case 'dizzy':
         f = { brow: 0.4, mouth: 'open', eyes: 'spiral', anger: 0, blush: 0.5 };

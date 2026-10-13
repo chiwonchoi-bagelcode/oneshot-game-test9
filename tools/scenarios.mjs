@@ -172,6 +172,47 @@ export default {
     await wait(3000);
     await shot('64-fail-panel');
   },
+  async stroke({ page, shot, wait }) {
+    await start(page, wait);
+    await ev(page, () => {
+      const a = window.__rafting;
+      a.manual = true;
+      a.debugJump(30, 0);
+      a.rig.setMode('close');
+      a.rig.closeDist = 0.9;
+      a.rig.closeSide = 2;
+      a.rig.closeLook = -3;
+      a.step(1 / 30, 60);
+      a.tapOwner('L');
+    });
+    for (let i = 0; i < 12; i++) {
+      await ev(page, () => window.__rafting.step(1 / 30, 2));
+      await shot(`70-stroke-${String(i).padStart(2, '0')}`);
+    }
+  },
+  async keaton({ page, shot, wait }) {
+    await start(page, wait);
+    await ev(page, () => {
+      const a = window.__rafting;
+      a.manual = true;
+      a.debugJump(30, 0);
+      a.rig.setMode('close');
+      a.rig.closeDist = 1.1;
+      a.rig.closeSide = 3;
+      a.rig.closeLook = -2.5;
+      a.step(1 / 30, 30);
+      // knock the left room's front wall down twice
+      const wall = a.house.pieces.find((p) => p.keaton === 'L');
+      a.house.breakPiece(wall, 0.5, a.game);
+    });
+    await ev(page, () => window.__rafting.step(1 / 30, 20));
+    await shot('80-lean');
+    await ev(page, () => { const a = window.__rafting; const wall = a.house.pieces.find((p) => p.keaton === 'L'); wall.anim = null; a.house.breakPiece(wall, 0.9, a.game); });
+    for (let i = 0; i < 6; i++) {
+      await ev(page, () => window.__rafting.step(1 / 30, 4));
+      await shot(`81-fall-${i}`);
+    }
+  },
   async auto({ page, shot, wait }) {
     await start(page, wait);
     await ev(page, () => { const a = window.__rafting; a.auto = { fair: true }; a.fast = 3; });

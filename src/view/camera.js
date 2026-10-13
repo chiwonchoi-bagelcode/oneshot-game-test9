@@ -80,8 +80,8 @@ export class CameraRig {
       lz = tmp2.z;
     } else if (this.mode === 'close') {
       // debug close-up of the deck
-      toWorld(h.u, h.d - 7 * (this.closeDist || 1), tmp);
-      toWorld(h.u, h.d, tmp2);
+      toWorld(h.u + (this.closeLook || 0), h.d - 7 * (this.closeDist || 1), tmp);
+      toWorld(h.u + (this.closeLook || 0), h.d, tmp2);
       px = tmp.x + (this.closeSide || 0);
       pz = tmp.z;
       py = 6.5 * (this.closeDist || 1);

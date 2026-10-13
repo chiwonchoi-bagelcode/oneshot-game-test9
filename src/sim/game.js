@@ -38,6 +38,7 @@ function newOwner(id) {
     stage: 0,
     sawing: false,
     cut: 0,
+    leaving: 0,
     holdTime: 0,
     waitTime: 0,
     dizzy: 0,
@@ -121,7 +122,7 @@ export class Game {
   tap(id) {
     if (this.state !== 'running') return false;
     const o = this.owners[id];
-    if (!o || o.state !== 'aboard') return false;
+    if (!o || o.state !== 'aboard' || o.leaving > 0) return false;
     const p = this.paddle;
     if (p.flight) {
       if (p.flight.to !== id) p.queued = id;
@@ -286,9 +287,9 @@ export class Game {
         const to = p.flight.to;
         const o = this.owners[to];
         p.flight = null;
-        if (o.state !== 'aboard') {
-          // receiver vanished mid-throw: it boomerangs to anyone aboard
-          const any = this.aboard()[0];
+        if (o.state !== 'aboard' || o.leaving > 0) {
+          // receiver is leaving: the paddle clatters back to someone who is staying
+          const any = this.aboard().find((x) => !(this.owners[x].leaving > 0)) || this.aboard()[0];
           p.holder = any;
           return;
         }
@@ -368,9 +369,18 @@ export class Game {
         o.stage = stage;
         this.emit('stage', { id, stage, up });
       }
-      if (o.sawing && !incoming && !dizzy) {
+      if (o.leaving > 0) {
+        // the beat before the floor goes: they stand up and look at us
+        o.leaving -= dt;
+        if (o.leaving <= 0) this.detach(id);
+      } else if (o.sawing && !incoming && !dizzy) {
         o.cut += dt / SAW_TIME;
-        if (o.cut >= 1) this.detach(id);
+        if (o.cut >= 1) {
+          o.cut = 1;
+          o.leaving = 0.75;
+          this.slowmo(0.9, 0.35);
+          this.emit('cutDone', { id });
+        }
       }
     }
   }
@@ -397,7 +407,6 @@ export class Game {
     });
     this.stats.lost.push({ id, d: Math.round(h.d) });
     leanKick(h, -o.side * 0.6, 0.3);
-    this.slowmo(0.75, 0.3);
     this.emit('detach', { id, part, d: h.d });
   }
 

@@ -232,7 +232,17 @@ class App {
     let dt = (now - this.last) / 1000;
     this.last = now;
     dt = Math.min(dt, 0.05);
-    this.adaptQuality(dt);
+    if (this.manual) return;
+    this.frame_(dt);
+  }
+
+  // deterministic stepping for tests: advance n frames of dt each, then render
+  step(dt = 1 / 60, n = 1) {
+    for (let i = 0; i < n; i++) this.frame_(dt);
+  }
+
+  frame_(dt) {
+    if (!this.manual) this.adaptQuality(dt);
     if (this.paused) return;
     const game = this.game;
     if (this.state === 'play' || this.state === 'ending' || this.state === 'failed') {
@@ -258,6 +268,11 @@ class App {
     this.renderer.render(this.scene, this.camera);
     this.processShots();
     this.ui.updateBubbles((id) => this.bubbleAnchor(id));
+    if (this.state === 'play') {
+      const showTags = this.game.runTime < 14 && this.game.house.d < 120;
+      if (showTags !== !!this.ui.tagsOn) this.ui.showTags(showTags);
+      this.ui.updateTags((id) => (this.game.owners[id].state === 'aboard' ? this.house.views[id].root.getWorldPosition(_v2) : null));
+    } else if (this.ui.tagsOn) this.ui.showTags(false);
   }
 
   adaptQuality(dt) {
@@ -358,6 +373,16 @@ class App {
           ui.say(e.id, 'appeased', { force: true });
           ui.popup(e.last ? '막판 달래기!' : '달래기 성공!', v.headWorld(_v), 'good');
           audio.stinger('appease');
+          break;
+        }
+        case 'cutDone': {
+          ui.say(e.id, '그럼 이만~', { force: true, mood: 'happy', dur: 1200 });
+          this.audio.slideUp();
+          for (const id of game.aboard()) {
+            if (id === e.id) continue;
+            this.house.views[id].onShock(new THREE.Vector3(v.pos.x, 0, v.pos.y));
+            ui.say(id, 'shock', { force: true });
+          }
           break;
         }
         case 'detach':
@@ -488,6 +513,18 @@ class App {
     if (aboard.length) {
       const who = aboard[Math.floor(Math.random() * aboard.length)];
       this.ui.say(who, 'hit', { force: true, angry: true });
+      // and somebody always blames whoever had the paddle
+      const holder = game.paddle.holder;
+      const blamer = aboard.find((x) => x !== holder && x !== who);
+      if (holder && blamer && Math.random() < 0.7) {
+        this.later(650, () => {
+          const bv = this.house.views[blamer];
+          const hv = this.house.views[holder];
+          if (!bv || !hv) return;
+          bv.onBlame(new THREE.Vector3(hv.pos.x, 0, hv.pos.y));
+          this.ui.say(blamer, 'blame', { force: true, angry: true });
+        });
+      }
     }
   }
 
@@ -501,10 +538,7 @@ class App {
     this.ui.popup('똑!', p, 'drop');
     this.rig.shake(0.25);
     this.later(900, () => this.ui.say(e.id, 'farewell', { force: true, mood: 'happy', dur: 2400 }));
-    for (const id of game.aboard()) {
-      this.house.views[id].onShock(new THREE.Vector3(v.pos.x, 0, v.pos.y));
-      this.later(400 + Math.random() * 500, () => this.ui.say(id, 'shock', { force: true }));
-    }
+    for (const id of game.aboard()) this.house.views[id].onShock(new THREE.Vector3(v.pos.x, 0, v.pos.y));
     if (game.aboard().length === 1) this.later(2600, () => this.ui.say(game.aboard()[0], 'lone', { force: true }));
     const name = OWNER_DEFS[e.id].name;
     const what = { L: '침대와 장미 화분', R: '침대와 해바라기 화분', C: '침대와 선인장' }[e.id];
@@ -996,6 +1030,7 @@ class App {
 }
 
 const _v = new THREE.Vector3();
+const _v2 = new THREE.Vector3();
 const _up = new THREE.Vector3(0, 0.5, 0);
 const tmpW = { x: 0, z: 0 };
 
