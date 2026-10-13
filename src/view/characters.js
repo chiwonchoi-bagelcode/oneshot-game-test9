@@ -109,8 +109,7 @@ export class Character {
       smirk: mesh(G.torus(0.06, 0.018, 6, 12, Math.PI * 0.7), '#5a1f1a', head, [0.03, mouthY + 0.02, mz], [0, 0, Math.PI + 0.3], 0),
     };
     this.mouths.open.scale.set(1, 1.1, 0.5);
-    const teethLine = mesh(G.box(0.17, 0.008, 0.01), '#1b1410', this.mouths.grit, [0, 0, 0.022], [0, 0, 0], 0);
-    void teethLine;
+    mesh(G.box(0.17, 0.008, 0.01), '#1b1410', this.mouths.grit, [0, 0, 0.022], [0, 0, 0], 0);
     this.mouth = 'smile';
     // blush / anger cheeks
     this.cheeks = [];
@@ -149,8 +148,7 @@ export class Character {
     for (const s of [-1, 1]) {
       const pivot = new THREE.Group();
       pivot.position.set(s * 0.3, 0.86, 0);
-      const upper = mesh(G.cyl(0.07, 0.065, 0.42, 8), d.shirt, pivot, [0, -0.21, 0], [0, 0, 0], 0.022);
-      void upper;
+      mesh(G.cyl(0.07, 0.065, 0.42, 8), d.shirt, pivot, [0, -0.21, 0], [0, 0, 0], 0.022);
       const hand = new THREE.Mesh(G.sph(0.085, 10, 8), this.skinMat);
       hand.position.y = -0.46;
       addOutline(hand, 0.018);

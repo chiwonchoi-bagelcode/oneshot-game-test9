@@ -1,6 +1,6 @@
 // High-angle chase camera: behind and above the house, river rushing in from the top of a portrait screen.
 import * as THREE from 'three';
-import { toWorld, heading, flowSpeed, halfWidth } from '../sim/course.js';
+import { toWorld, flowSpeed, halfWidth } from '../sim/course.js';
 import { damp, clamp, lerp, noise1 } from '../util/math.js';
 
 const tmp = { x: 0, z: 0 };
@@ -141,6 +141,5 @@ export class CameraRig {
       this.cam.fov = lerp(this.cam.fov, fov, Math.min(1, dt * 6));
       this.cam.updateProjectionMatrix();
     }
-    void heading;
   }
 }

@@ -128,8 +128,7 @@ export class HouseView {
     // scissors marker: a little red pennant at the start of the line
     const marker = new THREE.Group();
     mesh(G.cyl(0.02, 0.02, 0.5, 5), '#333', marker, [0, 0.25, 0], [0, 0, 0], 0);
-    const flag = mesh(G.box(0.24, 0.16, 0.02), '#ff3b3b', marker, [0.12, 0.42, 0], [0, 0, 0], 0.01);
-    void flag;
+    mesh(G.box(0.24, 0.16, 0.02), '#ff3b3b', marker, [0.12, 0.42, 0], [0, 0, 0], 0.01);
     marker.position.copy(pts[0]);
     marker.visible = false;
     this.tilt.add(marker);
@@ -464,7 +463,6 @@ export class HouseView {
     else if (p.kind === 'roof') p.anim = { type: 'slide', t: 0 };
     else p.anim = { type: 'fly', t: 0 };
     this.audio?.crack(strength);
-    void game;
   }
 
   updatePieces(dt, game) {
@@ -728,8 +726,7 @@ export class HouseView {
       container.rotation.order = 'YXZ';
       this.scene.add(container);
       container.position.copy(v.root.getWorldPosition(_v));
-      const plank = mesh(G.box(1.6, 0.14, 0.7), '#c89a5e', container, [0, 0.0, 0], [0, 0, 0], 0.03);
-      void plank;
+      mesh(G.box(1.6, 0.14, 0.7), '#c89a5e', container, [0, 0.0, 0], [0, 0, 0], 0.03);
       container.attach(v.root);
       v.root.position.set(0, -0.2, 0);
       v.root.rotation.set(0, 0, 0);
@@ -774,7 +771,6 @@ export class HouseView {
     m.rope.position.copy(m.anchor);
     m.rope.scale.set(1, len, 1);
     m.rope.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
-    void game;
   }
 
   // world position helpers for UI

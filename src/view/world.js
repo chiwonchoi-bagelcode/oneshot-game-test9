@@ -4,7 +4,7 @@ import {
   D_MIN, D_MAX, BEACH_D, halfWidth, toWorld, heading, cliffHeight, ROCKS, beachLine,
 } from '../sim/course.js';
 import { mulberry32, noise1, clamp, smooth } from '../util/math.js';
-import { toon, toonVC, addOutline, G, mesh, outlineMaterial, bakeGroup } from './toon.js';
+import { toon, toonVC, addOutline, G, mesh, bakeGroup } from './toon.js';
 
 const C = (hex) => new THREE.Color(hex);
 
@@ -480,4 +480,3 @@ function cottage(roofColor) {
   return g;
 }
 
-export { outlineMaterial };

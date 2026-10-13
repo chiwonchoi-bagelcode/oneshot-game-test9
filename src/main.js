@@ -729,8 +729,7 @@ class App {
         v.forced = 'flag';
         const flag = new THREE.Group();
         mesh(G.cyl(0.03, 0.03, 1.6, 6), '#5b3a1e', flag, [0, 0.8, 0], [0, 0, 0], 0.015);
-        const cloth = mesh(G.box(0.6, 0.4, 0.02), OWNER_DEFS[oid].color, flag, [0.3, 1.4, 0], [0, 0, 0], 0.015);
-        void cloth;
+        mesh(G.box(0.6, 0.4, 0.02), OWNER_DEFS[oid].color, flag, [0.3, 1.4, 0], [0, 0, 0], 0.015);
         flag.position.set(0.35, 0, 0.35);
         v.root.add(flag);
         this.endingProps.push(flag);
@@ -863,12 +862,12 @@ class App {
         if (!fv) continue;
         center = this.ui.project(fv.container.getWorldPosition(new THREE.Vector3()).setY(1));
       }
-      const src = this.snapshot(center, s.big ? 0.9 : 0.55, s.caption);
+      const src = this.snapshot(center, s.big ? 0.9 : 0.55);
       if (src) this.photos.push({ key: s.key, src, caption: s.caption });
     }
   }
 
-  snapshot(center, frac, caption) {
+  snapshot(center, frac) {
     try {
       const cv = document.createElement('canvas');
       const out = 300;
@@ -886,7 +885,6 @@ class App {
       // warm photo tint
       ctx2.fillStyle = 'rgba(255, 220, 160, 0.12)';
       ctx2.fillRect(0, 0, out, out);
-      void caption;
       return cv.toDataURL('image/jpeg', 0.82);
     } catch {
       return null;
@@ -1099,4 +1097,3 @@ function boot() {
 if (params.has('nostart')) window.__boot = boot;
 else boot();
 
-export { halfWidth };

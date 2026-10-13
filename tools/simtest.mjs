@@ -1,7 +1,7 @@
 // Headless playtest: drives the pure simulation with a look-ahead bot to check the course is fair.
 // The bot clones the game, tries each possible paddle pass, and keeps the one that stays clear of rocks.
 import { Game } from '../src/sim/game.js';
-import { ROCKS, POOLS } from '../src/sim/course.js';
+import { ROCKS } from '../src/sim/course.js';
 import { rockClearance } from '../src/sim/house.js';
 
 function cloneGame(g) {

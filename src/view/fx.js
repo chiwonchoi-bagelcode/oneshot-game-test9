@@ -11,7 +11,6 @@ const _q = new THREE.Quaternion();
 const _e = new THREE.Euler();
 const _s = new THREE.Vector3();
 const _p = new THREE.Vector3();
-const _c = new THREE.Color();
 
 export class FX {
   constructor(scene) {
@@ -264,7 +263,6 @@ export class FX {
     this.ringMesh.count = n;
     this.ringMesh.instanceMatrix.needsUpdate = true;
     this.ringAlpha.needsUpdate = true;
-    void _c;
   }
 
   clear() {

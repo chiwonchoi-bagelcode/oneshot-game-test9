@@ -3,7 +3,6 @@
 import * as THREE from 'three';
 import { Character } from './characters.js';
 import { OWNER_DEFS, STAGE } from '../sim/game.js';
-import { PARTS } from '../sim/house.js';
 import { Y0 } from './houseModel.js';
 import { clamp, damp, dampAngle, lerp, smooth } from '../util/math.js';
 
@@ -89,7 +88,6 @@ export class OwnerView {
     this.splashed.entry = false;
     this.splashed.exit = false;
     if (e.big) this.catchAnim = 0.12;
-    void game;
   }
   onThrow() {
     this.throwAnim = 0.3;
@@ -171,7 +169,6 @@ export class OwnerView {
       const p = v.localPosIn(this.def.room, this.house, _w);
       face = Math.atan2(p.x - this.pos.x, p.z - this.pos.y);
     };
-    const s = this.house.side;
     if (pose === 'paddle') {
       const dir = this.stroke ? this.stroke.dir : game.strokeDir(this.id);
       this.computeStrokeSide(dir, game);
@@ -540,8 +537,6 @@ export class OwnerView {
     else if (dir < 0) this.strokeSide.set(-1, 0.35);
     else if (dir > 0) this.strokeSide.set(1, 0.35);
     else this.strokeSide.set(0, 1);
-    // compensate for the house yaw a bit so strokes look like they push the right way
-    void game;
     this.strokeSide.normalize();
   }
 
@@ -557,7 +552,6 @@ export class OwnerView {
     } else sampleStroke(strokeS, f, amp, _tip, _grip);
     this.paddleTip.copy(_tip);
     this.paddleGrip.copy(_grip);
-    void game;
   }
 
   // owner-local point -> body-local (for arm IK); body has kneel/lean but close enough
@@ -570,8 +564,6 @@ export class OwnerView {
   localPosIn(room, houseView, out) {
     // position of this owner expressed in another part's local frame (parts share the tilt frame)
     out.set(this.pos.x, 0, this.pos.y);
-    void room;
-    void houseView;
     return out;
   }
 
@@ -598,4 +590,3 @@ export class OwnerView {
   }
 }
 
-export { PARTS };
