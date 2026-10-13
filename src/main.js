@@ -98,6 +98,7 @@ class App {
     for (const t of this.timers) clearTimeout(t);
     this.timers = [];
     this.hintFlags = {};
+    this.warned = new Set();
     this.lastRoar = 0;
     this.sprayT = 1;
     this.ending = null;
@@ -262,6 +263,7 @@ class App {
       this.ui.updateHUD(game);
       this.updateHints();
       this.updateSpray(dt);
+      this.updateDanger();
     }
     if (this.state === 'title') this.titleChatter(dt);
     if (this.ending) this.updateEnding(dt);
@@ -999,6 +1001,37 @@ class App {
       sawPan,
       musicIntensity: this.state === 'title' ? 0.4 : rough > 0.5 || roar > 0.5 ? 1 : 0.5,
     });
+  }
+
+  // telegraph a rock that is about to be hit, so the last-second throw is a real choice
+  updateDanger() {
+    const g = this.game;
+    const h = g.house;
+    if (g.state !== 'running' || h.whirl) return;
+    this.warned = this.warned || new Set();
+    const half = (h.maxU - h.minU) / 2;
+    const mid = (h.maxU + h.minU) / 2;
+    for (let i = 0; i < ROCKS.length; i++) {
+      const rk = ROCKS[i];
+      const ahead = rk.d - h.d - 2.5;
+      if (ahead < 0) continue;
+      if (ahead > 20) break;
+      if (rk.r < 1.1 || this.warned.has(i)) continue;
+      const t = ahead / Math.max(1.5, h.vd);
+      if (t > 1.6) continue;
+      const uPred = mid + h.vu * Math.min(t, 0.8);
+      if (Math.abs(uPred - rk.u) > half + rk.r * 0.9 - 0.15) continue;
+      this.warned.add(i);
+      toWorld(rk.u, rk.d, tmpW);
+      this.ui.popup('!', new THREE.Vector3(tmpW.x, rk.h * 1.3 + 1.2, tmpW.z), 'hit');
+      const aboard = g.aboard().filter((id) => id !== g.paddle.holder);
+      const who = aboard[Math.floor(Math.random() * aboard.length)];
+      if (who) {
+        this.house.views[who].onShock(null);
+        this.ui.say(who, ['바위!!', '앞에 바위!', '부딪힌다!!'][Math.floor(Math.random() * 3)], { force: true, angry: true, dur: 900 });
+      }
+      break;
+    }
   }
 
   // spray flying onto the deck as the house plows through white water

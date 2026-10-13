@@ -215,7 +215,7 @@ export default {
   },
   async auto({ page, shot, wait }) {
     await start(page, wait);
-    await ev(page, () => { const a = window.__rafting; a.auto = { fair: true }; a.fast = 3; });
+    await ev(page, () => { const a = window.__rafting; a.auto = { fair: true }; a.fast = 4; });
     for (let i = 0; i < 16; i++) {
       await wait(4000);
       const st = await ev(page, () => { const g = window.__rafting.game; return `${window.__rafting.state} d=${g.house.d.toFixed(0)} hp=${g.hp.toFixed(2)} aboard=${g.aboard().join('')}`; });
